@@ -7,6 +7,7 @@ import numpy as np
 import pnm
 from scipy import fft
 import paco
+import patches
 
 #-----------------------------------------------------------------------
 
@@ -16,6 +17,7 @@ class PacoDctInpainting(paco.PACO):
     """
     def __init__(self,input_signal,input_mask,patch_shape,patch_stride):
         super().__init__(input_signal,patch_shape,patch_stride)
+        self.mapper        = patches.PatchMapper2D(input_signal.shape,patch_shape,patch_stride)
         if self.mapper.padded_shape != self.mapper.signal_shape:
             pad_size = [ (0, a-b) for (a,b) in zip(self.mapper.padded_shape,self.mapper.signal_shape)]
             self.input_mask = np.pad(input_mask, pad_size)
