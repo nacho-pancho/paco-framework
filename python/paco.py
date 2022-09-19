@@ -12,7 +12,7 @@ import patches
 
 class PACO:
     """
-    Generic PACO implementation (over regular patch grids)
+    Generic, ADMM PACO implementation (over regular patch grids)
     """
     def __init__(self,input_signal,patch_shape,patch_stride):
         self.mapper        = patches.PatchMapper(input_signal.shape,patch_shape,patch_stride)
@@ -135,3 +135,54 @@ class PACO:
         #
         return self.output_signal
 
+
+class LinearizedPACO(PACO):
+    """
+    Linearized ADMM PACO implementation (over regular patch grids) for
+    linear patch models based on a generic non-orthogonal dictionary
+    """
+    def __init__(self,input_signal,patch_shape,patch_stride, dictionary):
+        super().__init__(input_signal,patch_shape,patch_stride)
+        self.dictionary = dictionary
+
+    def run(self, tau=1, mu=0.9,maxiter=100, minchange=1e-5, check_every=1):
+        tau *= np.max(self.input_signal)
+        self.prevB = np.empty(self.mapper.patch_matrix_shape)
+        #
+        # ADMM ITERATION
+        #
+        tic = time.time()
+        self.iter = 0
+        D = self.dictionary # short alias
+        AD = np.dot(self.A, self.D)
+        while iter < maxiter:
+            # 1 proximal operator on A
+            self.prox_f(self.A - (mu/tau)*np.dot((AD - self.B + self.U),self.D.T), mu, self.A)
+            AD = np.dot(self.A,self.D)
+            self.prox_g( AD + self.U, self.B )
+            self.U += AD
+            self.U -= self.B
+            if (self.iter % check_every) == 0:
+                self.monitor()
+                #
+                # 4.2 default stopping condition
+                #
+                rel_ch = np.linalg.norm(self.B - self.prevB,'fro') / ( np.linalg.norm(self.B,'fro') + 1e-5 )
+                if rel_ch < minchange:
+                    break
+                dt = time.time() - tic
+                tic = time.time()
+                print('iter',self.iter,'time',dt,'rel. chg.',rel_ch,'min. chg.',minchange)
+                #
+                # 4.3 save intermediate result
+                #
+                # self.mapper.stitch(self.A, self.output_signal)
+                # (insert save statement here)
+                np.copyto(self.prevB,self.B)
+                #
+                # end check progress
+                #
+            #
+            # end main ADMM loop
+            #
+            self.mapper.stitch(self.B, self.output_signal)
