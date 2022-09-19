@@ -13,8 +13,6 @@ ifdef PROFILE
   CFLAGS += -pg
 endif
 
-PROBLEM_SRC=$(wildcard *_problem.c)
-PROBLEM_OBJ=$(patsubst %.c,%.o,$(PROBLEM_SRC))
 HEADERS=$(wildcard *.h)
 TOOL_SRC=$(wildcard *_tool.c)
 TOOL_TARGETS=$(patsubst %.c,%,$(TOOL_SRC))
