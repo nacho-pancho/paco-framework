@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"paco_dct.h": "c",
+			"paco_io.h": "c",
+			"paco_linalg.h": "c",
+			"paco_mapping.h": "c",
+			"string.h": "c",
+			"gsl_linalg.h": "c",
+			"paco_dict.h": "c",
+			"paco_types.h": "c"
+		}
+	}
+}
